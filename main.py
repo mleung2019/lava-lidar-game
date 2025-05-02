@@ -16,7 +16,7 @@ frame_width = 1280
 frame_height = 720
 
 screen = pygame.display.set_mode((frame_width, frame_height))
-pygame.display.set_caption("LIDAR Lava Game")
+pygame.display.set_caption("Lava LIDAR Game")
 
 # Main loop
 running = True

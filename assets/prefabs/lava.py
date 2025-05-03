@@ -29,13 +29,13 @@ class Lava:
         icon_pos_x = ((self.pos_x * 2) + self.width)/2 - 24
         icon_pos_y = settings.SCREEN_HEIGHT/2 - 54
         if self.loops > 0:
-            counter = game.medium_font.render(f"{self.loops}", True, settings.TEXT_COLOR)
+            counter = game.big_font.render(f"{self.loops}", True, settings.TEXT_COLOR)
             game.base_surface.blit(counter, (icon_pos_x, icon_pos_y))
         # Caution
         else:
             # Blend caution for correct opacity
             temp_caution = pygame.Surface(self.caution.get_size(), pygame.SRCALPHA)
-            temp_caution.fill((255, 255, 255, self.opacity))
+            temp_caution.fill((255, 255, 255, min(self.opacity * 2, 255)))
             temp_caution.blit(self.caution, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
             game.base_surface.blit(temp_caution, (icon_pos_x - 75, icon_pos_y - 50))

@@ -1,6 +1,7 @@
 import pygame
 import settings
-from scenes.gameplay import Gameplay
+from assets.scenes.gameplay import Gameplay
+from assets.scenes.calibration import Calibration
 
 class Game:
     def __init__(self):
@@ -12,27 +13,43 @@ class Game:
         self.dt = 0
         self.running = True
 
-        # Game states
-        self.states = {
-           "gameplay": Gameplay()   
-        }
-        self.current_state = self.states["gameplay"]
+        # Initial game state
+        self.change_states("gameplay")
 
         # Game rendering
         self.base_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
 
         # Global variables
         self.frame_counter = 0
-        self.medium_font = pygame.font.SysFont("bitstreamverasans", 90)
+        self.medium_font = pygame.font.SysFont("bitstreamverasans", 60)
+        self.big_font = pygame.font.SysFont("bitstreamverasans", 90)
 
 
-    def run(self):
+    def change_states(self, state):
+        if state == "gameplay":
+            self.current_state = Gameplay()
+        elif state == "calibration":
+            self.current_state = Calibration()
+
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            # Resize window if needed
+            elif event.type == pygame.VIDEORESIZE:
+                self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+            # Handle events from other states
+            else:
+                self.current_state.handle_events(self, event)
+
+
+    def execute(self):
         while self.running:
             self.dt = self.clock.tick(settings.FPS) / 1000
             self.handle_events()
 
             # Draw game frame
-            self.base_surface.fill((0, 0, 0))  # Clear with black
             self.current_state.execute(self)
 
             # Draw debug
@@ -50,21 +67,8 @@ class Game:
 
         pygame.quit()
 
-
-    def handle_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            # Resize window if needed
-            elif event.type == pygame.VIDEORESIZE:
-                self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-            # Handle events from other states
-            else:
-                self.current_state.handle_events(self, event)
-
-
     
     def debug(self):
         fps = self.clock.get_fps()
         fps_text = self.medium_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
-        self.base_surface.blit(fps_text, (10, 10))
+        self.base_surface.blit(fps_text, (1000, 10))

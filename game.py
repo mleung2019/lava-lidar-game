@@ -9,6 +9,7 @@ class Game:
         pygame.display.set_caption("Lava LIDAR Game")
         self.screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.RESIZABLE)
         self.clock = pygame.time.Clock()
+        self.dt = 0
         self.running = True
 
         # Game states
@@ -22,18 +23,17 @@ class Game:
 
         # Global variables
         self.frame_counter = 0
-        self.font = pygame.font.SysFont(None, 30)
-        self.text_color = (255, 255, 255)
+        self.medium_font = pygame.font.SysFont("bitstreamverasans", 90)
 
 
     def run(self):
         while self.running:
-            self.clock.tick(settings.FPS)
+            self.dt = self.clock.tick(settings.FPS) / 1000
             self.handle_events()
 
             # Draw game frame
             self.base_surface.fill((0, 0, 0))  # Clear with black
-            self.current_state.draw(self)
+            self.current_state.execute(self)
 
             # Draw debug
             self.debug()
@@ -46,7 +46,7 @@ class Game:
             pygame.display.flip()
 
             # Update frame_counter variable
-            self.frame_counter = (self.frame_counter + 1) % 2
+            self.frame_counter += 1
 
         pygame.quit()
 
@@ -58,9 +58,13 @@ class Game:
             # Resize window if needed
             elif event.type == pygame.VIDEORESIZE:
                 self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+            # Handle events from other states
+            else:
+                self.current_state.handle_events(self, event)
+
 
     
     def debug(self):
         fps = self.clock.get_fps()
-        fps_text = self.font.render(f"FPS: {fps:.1f}", True, self.text_color)
+        fps_text = self.medium_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
         self.base_surface.blit(fps_text, (10, 10))

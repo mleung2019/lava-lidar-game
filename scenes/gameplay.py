@@ -1,7 +1,8 @@
 import pygame
-import pygame.display
 import settings
 import cv2
+import random
+from assets.prefabs.lava import Lava
 
 class Gameplay:
     def __init__(self):
@@ -17,10 +18,22 @@ class Gameplay:
 
         # Other instance variables
         self.arrow_x = 0 # The position of the arrow
+        self.obstacles = [] # An array of all current obstacles
 
-    def draw(self, game):
+
+    def handle_events(self, game, event):
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            lava = Lava(random.randint(0, 9), random.randint(1, 4), 1)
+            self.obstacles.append(lava)
+                
+
+
+    def execute(self, game):
         self.draw_webcam(game)
+        self.draw_obstacles(game)
         self.draw_indicator(game)
+
+        self.arrow_x = (self.arrow_x + 10) % settings.SCREEN_WIDTH
 
     
     def draw_webcam(self, game):
@@ -44,4 +57,11 @@ class Gameplay:
 
     def draw_indicator(self, game):
         game.base_surface.blit(self.arrow, (self.arrow_x, 180))
-        self.arrow_x = (self.arrow_x + 10) % settings.SCREEN_WIDTH
+
+    
+    def draw_obstacles(self, game):
+        for obstacle in self.obstacles:
+            obstacle.execute(game)
+
+        # Filter out obstacles that need to be despawned
+        self.obstacles = [obstacle for obstacle in self.obstacles if not obstacle.finished]

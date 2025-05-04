@@ -17,6 +17,10 @@ class Lava:
     
 
     def execute(self, game):
+        self.draw_lava_anim(game)
+        
+        
+    def draw_lava_anim(self, game):
         # Set rectangle dimensions and color
         warning_rect = pygame.Surface((self.width, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
         warning_rect.fill((255, 0, 0, self.opacity))
@@ -25,26 +29,26 @@ class Lava:
         game.base_surface.blit(warning_rect, (self.pos_x, 0))
 
         # Draw indicator 
+        icon_pos_x = ((self.pos_x * 2) + self.width) // 2
+        icon_pos_y = settings.SCREEN_HEIGHT // 2
+        indicator = self.caution
+
         # Counter
-        icon_pos_x = ((self.pos_x * 2) + self.width)/2 - 24
-        icon_pos_y = settings.SCREEN_HEIGHT/2 - 54
         if self.loops > 0:
-            counter = game.big_font.render(f"{self.loops}", True, settings.TEXT_COLOR)
-            game.base_surface.blit(counter, (icon_pos_x, icon_pos_y))
+            indicator = game.big_font.render(f"{self.loops}", True, settings.TEXT_COLOR)
         # Caution
         else:
             # Blend caution for correct opacity
-            temp_caution = pygame.Surface(self.caution.get_size(), pygame.SRCALPHA)
-            temp_caution.fill((255, 255, 255, min(self.opacity * 2, 255)))
-            temp_caution.blit(self.caution, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-
-            game.base_surface.blit(temp_caution, (icon_pos_x - 75, icon_pos_y - 50))
+            self.caution.set_alpha(min(self.opacity * 2, 255))
+        
+        indicator_rect = indicator.get_rect(center=(icon_pos_x, icon_pos_y))
+        game.base_surface.blit(indicator, indicator_rect)
 
         # Update opacity
         self.opacity -= self.speed * game.dt * 300
         
         # Blinking effect
-        if self.opacity < 0:
+        if self.opacity <= 0:
             self.loops -= 1
             # Reset blinking effect
             if self.loops > 0:

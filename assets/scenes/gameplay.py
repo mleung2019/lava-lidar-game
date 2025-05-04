@@ -8,8 +8,7 @@ class Gameplay(Scene):
     def __init__(self):
         super().__init__()
 
-        # Other instance variables
-        self.time = 0 # Survival time
+        # Instance variables
         self.obstacles = [] # An array of all current obstacles
         self.arrow_x = 0 # The position of the arrow
 
@@ -19,26 +18,32 @@ class Gameplay(Scene):
 
 
     def handle_events(self, game, event):
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            lava = Lava(random.randint(0, 9), random.randint(1, 4), 1)
-            self.obstacles.append(lava)
-        # Left click
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            game.change_states("calibration")
+        if event.type == pygame.KEYDOWN: 
+            # TODO: Lava debug
+            if event.key == pygame.K_SPACE:
+                lava = Lava(random.randint(0, 9), random.randint(1, 3), 1)
+                self.obstacles.append(lava)
+            # TODO: Calibration debug
+            if event.key == pygame.K_c:
+                game.change_states("calibration")
+            # TODO: Restart debug
+            if event.key == pygame.K_r:
+                game.change_states("restart")
                 
 
     def execute(self, game):
         self.draw_webcam(game)
         self.draw_obstacles(game)
         self.draw_indicator(game)
-        self.draw_time(game)
 
-        self.arrow_x = (self.arrow_x + 10) % settings.SCREEN_WIDTH
-        self.time += game.dt
+        game.last_frame = game.base_surface.copy()
+        
+        self.draw_time(game)
 
 
     def draw_indicator(self, game):
         game.base_surface.blit(self.arrow, (self.arrow_x, 180))
+        self.arrow_x = (self.arrow_x + 10) % settings.SCREEN_WIDTH
 
     
     def draw_obstacles(self, game):
@@ -50,5 +55,6 @@ class Gameplay(Scene):
 
 
     def draw_time(self, game):
-        time_text = game.medium_font.render(f"Time: {self.time:.2f}", True, settings.TEXT_COLOR)
+        game.time += game.dt
+        time_text = game.medium_font.render(f"Time: {game.time:.2f}", True, settings.TEXT_COLOR)
         game.base_surface.blit(time_text, (10, 10))

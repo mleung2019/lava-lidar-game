@@ -2,6 +2,7 @@ import pygame
 import settings
 from assets.scenes.gameplay import Gameplay
 from assets.scenes.calibration import Calibration
+from assets.scenes.restart import Restart
 
 class Game:
     def __init__(self):
@@ -14,17 +15,20 @@ class Game:
         self.running = True
 
         # Initial game state
-        self.change_states("gameplay")
+        self.change_states("calibration")
 
         # Game rendering
-        self.base_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
+        self.base_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)).convert_alpha()
+        self.last_frame = None
 
         # Global variables
         self.frame_counter = 0
+        self.time = 0
         self.best_time = 0
         # First element is the LIDAR measurement on the left side, second element
         # is the LIDAR measurement on the right side
-        self.calibration = [0, 0] 
+        self.calibration = [0, 0]
+        # Font(s)
         self.small_font = pygame.font.SysFont("bitstreamverasans", 45)
         self.medium_font = pygame.font.SysFont("bitstreamverasans", 60)
         self.big_font = pygame.font.SysFont("bitstreamverasans", 90)
@@ -32,9 +36,13 @@ class Game:
 
     def change_states(self, state):
         if state == "gameplay":
+            self.time = 0
             self.current_state = Gameplay()
         elif state == "calibration":
             self.current_state = Calibration()
+        elif state == "restart":
+            self.best_time = max(self.time, self.best_time)
+            self.current_state = Restart()
 
 
     def handle_events(self):

@@ -1,12 +1,12 @@
 import pygame
 import settings
-import cv2
 from assets.scenes.scene import Scene
 
 class Calibration(Scene):
     def __init__(self):
         super().__init__()
 
+        # Instance variables 
         self.cali_states = 0
 
 
@@ -27,9 +27,19 @@ class Calibration(Scene):
 
     def execute(self, game):
         self.draw_webcam(game)
+        self.draw_rect(game)
         self.draw_help_text(game)
 
-    
+
+    def draw_rect(self, game):
+        # Set rectangle dimensions and color
+        warning_rect = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
+        warning_rect.fill((0, 0, 0, 127))
+
+        # Draw rectangle
+        game.base_surface.blit(warning_rect, (0, 0))
+
+
     def draw_help_text(self, game):
         help_text = game.small_font.render("Click anywhere to start game", True, settings.TEXT_COLOR)
         if self.cali_states == 0:

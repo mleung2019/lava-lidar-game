@@ -21,6 +21,11 @@ class Game:
 
         # Global variables
         self.frame_counter = 0
+        self.best_time = 0
+        # First element is the LIDAR measurement on the left side, second element
+        # is the LIDAR measurement on the right side
+        self.calibration = [0, 0] 
+        self.small_font = pygame.font.SysFont("bitstreamverasans", 45)
         self.medium_font = pygame.font.SysFont("bitstreamverasans", 60)
         self.big_font = pygame.font.SysFont("bitstreamverasans", 90)
 
@@ -70,5 +75,5 @@ class Game:
     
     def debug(self):
         fps = self.clock.get_fps()
-        fps_text = self.medium_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
-        self.base_surface.blit(fps_text, (1000, 10))
+        fps_text = self.small_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
+        self.base_surface.blit(fps_text, (1065, 10))

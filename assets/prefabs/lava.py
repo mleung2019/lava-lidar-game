@@ -55,5 +55,3 @@ class Lava:
             # Despawn
             else:
                 self.finished = 1
-
-

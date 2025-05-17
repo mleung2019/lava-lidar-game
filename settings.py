@@ -3,3 +3,4 @@ SCREEN_HEIGHT = 720
 FPS = 60
 GRID_SIZE = 10
 TEXT_COLOR = (255, 255, 255)
+LIDAR_PORT = '/dev/cu.usbserial-1130'

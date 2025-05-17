@@ -34,7 +34,7 @@ class ReadLidar:
                 if self.ser.in_waiting > 0:
                     line = self.ser.readline().decode('utf-8', errors='replace').strip()
                     if line.isnumeric():
-                        self.measurement = line
+                        self.measurement = int(line)
                     else:
                         self.measurement = -2
                 

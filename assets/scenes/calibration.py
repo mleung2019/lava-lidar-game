@@ -13,13 +13,14 @@ class Calibration(Scene):
     def handle_events(self, game, event):
         # Left click
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            # TODO: Use LIDAR output to finish calibration
             if self.cali_states == 0:
                 # Left
-                game.calibration[0] = None
+                game.calibration[0] = game.lidar.measurement
             elif self.cali_states == 1:
                 # Right
-                game.calibration[1] = None
+                if game.calibration[0] == game.lidar.measurement:
+                    self.cali_states = -1
+                game.calibration[1] = game.lidar.measurement
             else:
                 game.change_states("gameplay")
             self.cali_states += 1

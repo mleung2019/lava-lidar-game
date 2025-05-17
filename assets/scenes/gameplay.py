@@ -43,7 +43,11 @@ class Gameplay(Scene):
 
     def draw_indicator(self, game):
         game.base_surface.blit(self.arrow, (self.arrow_x, 180))
-        self.arrow_x = (self.arrow_x + 10) % settings.SCREEN_WIDTH
+    
+        percentage = (game.lidar.measurement - game.calibration[0]) / (game.calibration[1] - game.calibration[0])
+        
+        if percentage > 0 and percentage < 1:
+            self.arrow_x = percentage * settings.SCREEN_WIDTH
 
     
     def draw_obstacles(self, game):

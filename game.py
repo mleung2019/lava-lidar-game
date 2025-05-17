@@ -16,6 +16,12 @@ class Game:
         self.dt = 0
         self.running = True
 
+        # Open LIDAR
+        self.lidar = ReadLidar()
+        self.lidar.open_port()
+        self.lidar_thread = threading.Thread(target=self.lidar.read_lidar)
+        self.lidar_thread.start()
+
         # Initial game state
         self.change_states("calibration")
 
@@ -60,12 +66,6 @@ class Game:
 
 
     def execute(self):
-        # Open LIDAR
-        lidar = ReadLidar()
-        lidar.open_port()
-        lidar_thread = threading.Thread(target=lidar.read_lidar)
-        lidar_thread.start()
-
         while self.running:
             self.dt = self.clock.tick(settings.FPS) / 1000
             self.handle_events()
@@ -74,7 +74,7 @@ class Game:
             self.current_state.execute(self)
 
             # Draw debug
-            self.debug(lidar.measurement)
+            self.debug(self.lidar.measurement)
 
             # Resize frame output to window
             win_width, win_height = self.screen.get_size()
@@ -87,8 +87,8 @@ class Game:
             self.frame_counter += 1
         
         # Close LIDAR
-        lidar.measurement = -1
-        lidar_thread.join()
+        self.lidar.measurement = -1
+        self.lidar_thread.join()
         
         pygame.quit()
 
@@ -98,5 +98,5 @@ class Game:
         fps_text = self.small_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
         self.base_surface.blit(fps_text, (1065, 10))
 
-        # measurement_text = self.small_font.render(f"M: {measurement}", True, settings.TEXT_COLOR)
-        # self.base_surface.blit(measurement_text, (905, 10))
+        measurement_text = self.small_font.render(f"M: {self.lidar.measurement}", True, settings.TEXT_COLOR)
+        self.base_surface.blit(measurement_text, (905, 10))

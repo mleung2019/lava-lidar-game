@@ -9,7 +9,7 @@ class Restart(Scene):
 
         # Instance variables
         self.opacity = 0
-        self.anim_finished = 0
+        self.anim_finished = False
 
 
     def handle_events(self, game, event):
@@ -47,7 +47,7 @@ class Restart(Scene):
         # Rectangle fade in effect
         if self.opacity >= 127:
             self.opacity = 127
-            self.anim_finished = 1
+            self.anim_finished = True
 
 
     def draw_info_text(self, game):

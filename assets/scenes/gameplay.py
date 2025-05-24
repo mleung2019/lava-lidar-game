@@ -2,38 +2,34 @@ import pygame
 import settings
 import random
 from assets.scenes.scene import Scene
-from assets.prefabs.lava import Lava
+from assets.prefabs.lava.lava_attacks import *
 
 class Gameplay(Scene):
     def __init__(self):
         super().__init__()
 
-        # Instance variables
-        self.obstacles = [] # An array of all current obstacles
-        self.arrow_x = 0 # The position of the arrow
-
         # Arrow indicator
         self.arrow = pygame.image.load("./assets/images/arrow.png").convert_alpha()
         self.arrow = pygame.transform.scale(self.arrow, (75, 100))
+        
+        # Current attack
+        self.curr_attack = -1
 
 
     def handle_events(self, game, event):
         if event.type == pygame.KEYDOWN: 
-            # TODO: Lava debug
-            if event.key == pygame.K_SPACE:
-                lava = Lava(random.randint(0, 9), random.randint(1, 3), 1)
-                self.obstacles.append(lava)
-            # TODO: Calibration debug
+            # Calibration debug
             if event.key == pygame.K_c:
                 game.change_states("calibration")
-            # TODO: Restart debug
+            # Restart debug
             if event.key == pygame.K_r:
                 game.change_states("restart")
                 
 
     def execute(self, game):
+        self.generate_attacks()
         self.draw_webcam(game)
-        self.draw_obstacles(game)
+        self.draw_attacks(game)
         self.draw_indicator(game)
 
         game.last_frame = game.base_surface.copy()
@@ -41,21 +37,19 @@ class Gameplay(Scene):
         self.draw_time(game)
 
 
+    def generate_attacks(self):
+        if self.curr_attack == -1 or self.curr_attack.finished:
+            # TODO: Randomize attack
+            self.curr_attack = InBetweens(1)
+
+
     def draw_indicator(self, game):
-        game.base_surface.blit(self.arrow, (self.arrow_x, 180))
-    
-        percentage = (game.lidar.measurement - game.calibration[0]) / (game.calibration[1] - game.calibration[0])
-        
-        if percentage > 0 and percentage < 1:
-            self.arrow_x = percentage * settings.SCREEN_WIDTH
+        # Offset the arrow indicator by 38 pixels to center it
+        game.base_surface.blit(self.arrow, (game.lidar_parse() - 38, 180))
 
-    
-    def draw_obstacles(self, game):
-        for obstacle in self.obstacles:
-            obstacle.execute(game)
 
-        # Filter out obstacles that need to be despawned
-        self.obstacles = [obstacle for obstacle in self.obstacles if not obstacle.finished]
+    def draw_attacks(self, game):
+        self.curr_attack.execute(game)
 
 
     def draw_time(self, game):

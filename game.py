@@ -16,14 +16,17 @@ class Game:
         self.dt = 0
         self.running = True
 
-        # Open LIDAR
-        self.lidar = ReadLidar()
-        self.lidar.open_port()
-        self.lidar_thread = threading.Thread(target=self.lidar.read_lidar)
-        self.lidar_thread.start()
-
         # Initial game state
-        self.change_states("calibration")
+        self.lidar = ReadLidar()
+        if settings.DEBUG:
+            self.change_states("gameplay")
+        else:
+            # Open LIDAR
+            self.lidar.open_port()
+            self.lidar_thread = threading.Thread(target=self.lidar.read_lidar)
+            self.lidar_thread.start()
+
+            self.change_states("calibration")
 
         # Game rendering
         self.base_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)).convert_alpha()
@@ -35,7 +38,8 @@ class Game:
         self.best_time = 0
         # First element is the LIDAR measurement on the left side, second element
         # is the LIDAR measurement on the right side
-        self.calibration = [0, 0]
+        self.calibration = [-1, -2]
+
         # Font(s)
         self.small_font = pygame.font.SysFont("bitstreamverasans", 45)
         self.medium_font = pygame.font.SysFont("bitstreamverasans", 60)
@@ -74,7 +78,7 @@ class Game:
             self.current_state.execute(self)
 
             # Draw debug
-            self.debug(self.lidar.measurement)
+            self.debug()
 
             # Resize frame output to window
             win_width, win_height = self.screen.get_size()
@@ -87,16 +91,27 @@ class Game:
             self.frame_counter += 1
         
         # Close LIDAR
-        self.lidar.measurement = -1
-        self.lidar_thread.join()
+        if not settings.DEBUG:
+            self.lidar.measurement = -1
+            self.lidar_thread.join()
         
         pygame.quit()
 
     
-    def debug(self, measurement):
+    def debug(self):
         fps = self.clock.get_fps()
         fps_text = self.small_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
         self.base_surface.blit(fps_text, (1065, 10))
 
         measurement_text = self.small_font.render(f"M: {self.lidar.measurement}", True, settings.TEXT_COLOR)
         self.base_surface.blit(measurement_text, (905, 10))
+
+
+    def lidar_parse(self):
+        percentage = 0
+
+        if not settings.DEBUG:
+            percentage = (self.lidar.measurement - self.calibration[0]) / (self.calibration[1] - self.calibration[0])
+            percentage = pygame.math.clamp(percentage, 0, 1)
+
+        return percentage * settings.SCREEN_WIDTH

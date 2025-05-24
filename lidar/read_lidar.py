@@ -1,6 +1,5 @@
 import serial
 import settings
-import time
 
 class ReadLidar:
     def __init__(self, port=settings.LIDAR_PORT, baudrate=115200):

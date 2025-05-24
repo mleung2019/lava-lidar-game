@@ -2,14 +2,15 @@ import pygame
 import settings
 
 class Lava:
-    def __init__(self, pos, width, speed):
+    def __init__(self, pos, width, speed, sequence):
         ratio = settings.SCREEN_WIDTH / settings.GRID_SIZE
         self.loops = 3
-        self.finished = 0
+        self.finished = False
         self.opacity = 127
         self.pos_x = pos * ratio
         self.width = width * ratio
         self.speed = speed
+        self.sequence = sequence
 
         # Caution indicator
         self.caution = pygame.image.load("./assets/images/caution.png").convert_alpha()
@@ -47,15 +48,33 @@ class Lava:
         # Update opacity
         self.opacity -= self.speed * game.dt * 300
         
+        # Detection frames
+        if self.loops == 0:
+            if self.opacity > 200 and self.opacity < 255:
+                self.detect_collision(game)
+
         # Blinking effect
         if self.opacity <= 0:
-            self.loops -= 1
+            self.loops -= 1            
+
             # Reset blinking effect
             if self.loops > 0:
                 self.opacity = 127
+
             elif self.loops == 0:
                 self.opacity = 255
                 self.speed *= 2
             # Despawn
             else:
-                self.finished = 1
+                self.finished = True
+                self.sequence += 1
+    
+
+    def detect_collision(self, game):
+        bound_left = self.pos_x 
+        bound_right = self.pos_x + self.width
+
+        player_pos = game.lidar_parse()
+
+        if (player_pos >= bound_left and player_pos <= bound_right):
+            game.change_states("restart")

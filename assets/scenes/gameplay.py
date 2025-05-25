@@ -15,6 +15,9 @@ class Gameplay(Scene):
         # Current attack
         self.curr_attack = -1
 
+        # All attacks
+        self.attacks = [LeftandRight, InBetweens, ThreeRotate, Drizzle]
+
 
     def handle_events(self, game, event):
         if event.type == pygame.KEYDOWN: 
@@ -39,8 +42,8 @@ class Gameplay(Scene):
 
     def generate_attacks(self):
         if self.curr_attack == -1 or self.curr_attack.finished:
-            # TODO: Randomize attack
-            self.curr_attack = InBetweens(1)
+            rand_attack = random.choice(self.attacks)
+            self.curr_attack = rand_attack(1)
 
 
     def draw_indicator(self, game):
@@ -54,5 +57,7 @@ class Gameplay(Scene):
 
     def draw_time(self, game):
         game.time += game.dt
+        game.best_time = max(game.time, game.best_time)
+        
         time_text = game.medium_font.render(f"Time: {game.time:.2f}", True, settings.TEXT_COLOR)
         game.base_surface.blit(time_text, (10, 10))

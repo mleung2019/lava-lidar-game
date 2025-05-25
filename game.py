@@ -39,6 +39,7 @@ class Game:
         # First element is the LIDAR measurement on the left side, second element
         # is the LIDAR measurement on the right side
         self.calibration = [-1, -2]
+        self.old_arrow_x = 0
 
         # Font(s)
         self.small_font = pygame.font.SysFont("bitstreamverasans", 45)
@@ -53,7 +54,6 @@ class Game:
         elif state == "calibration":
             self.current_state = Calibration()
         elif state == "restart":
-            self.best_time = max(self.time, self.best_time)
             self.current_state = Restart()
 
 
@@ -112,6 +112,10 @@ class Game:
 
         if not settings.DEBUG:
             percentage = (self.lidar.measurement - self.calibration[0]) / (self.calibration[1] - self.calibration[0])
-            percentage = pygame.math.clamp(percentage, 0, 1)
-
-        return percentage * settings.SCREEN_WIDTH
+        
+        if percentage >= 0 and percentage <= 1:
+            self.old_arrow_x = percentage * settings.SCREEN_WIDTH
+            return self.old_arrow_x
+        # Prevents a player from simply stepping out of range to dodge an attack
+        else:
+            return self.old_arrow_x

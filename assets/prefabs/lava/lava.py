@@ -2,7 +2,7 @@ import pygame
 import settings
 
 class Lava:
-    def __init__(self, pos, width, speed, sequence):
+    def __init__(self, pos, width, speed):
         ratio = settings.SCREEN_WIDTH / settings.GRID_SIZE
         self.loops = 3
         self.finished = False
@@ -10,11 +10,10 @@ class Lava:
         self.pos_x = pos * ratio
         self.width = width * ratio
         self.speed = speed
-        self.sequence = sequence
 
         # Caution indicator
         self.caution = pygame.image.load("./assets/images/caution.png").convert_alpha()
-        self.caution = pygame.transform.scale(self.caution, (200, 200))
+        self.caution = pygame.transform.scale(self.caution, (170, 170))
     
 
     def execute(self, game):
@@ -67,7 +66,6 @@ class Lava:
             # Despawn
             else:
                 self.finished = True
-                self.sequence += 1
     
 
     def detect_collision(self, game):

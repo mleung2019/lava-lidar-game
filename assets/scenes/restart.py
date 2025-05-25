@@ -57,12 +57,3 @@ class Restart(Scene):
             info_text = game.small_font.render(text, True, settings.TEXT_COLOR)
             info_rect = info_text.get_rect(center=(settings.SCREEN_WIDTH // 2, (settings.SCREEN_HEIGHT // 2) + (i * 75) - 150))
             game.base_surface.blit(info_text, info_rect)
-
-        # help_text = game.small_font.render("Click anywhere to start game", True, settings.TEXT_COLOR)
-        # if self.cali_states == 0:
-        #     help_text = game.small_font.render("Move to the left side of the screen and click anywhere", True, settings.TEXT_COLOR)
-        # if self.cali_states == 1:
-        #     help_text = game.small_font.render("Move to the right side of the screen and click anywhere", True, settings.TEXT_COLOR)
-
-        # text_rect = help_text.get_rect(center=(settings.SCREEN_WIDTH // 2, settings.SCREEN_HEIGHT // 2))
-        # game.base_surface.blit(help_text, text_rect)

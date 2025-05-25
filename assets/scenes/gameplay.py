@@ -13,10 +13,24 @@ class Gameplay(Scene):
         self.arrow = pygame.transform.scale(self.arrow, (75, 100))
         
         # Current attack
-        self.curr_attack = -1
+        self.curr_attack = Wait(1)
 
         # All attacks
-        self.attacks = [LeftandRight, InBetweens, ThreeRotate, Drizzle]
+        self.attacks = [
+            LeftandRight,
+            FullLeft,
+            FullRight, 
+            CenterOut, 
+            ThreeRotate, 
+            Drizzle, 
+            MouseHole,
+            Homing,
+        ]
+
+        # Speed
+        self.speed = 1
+        self.speed_timer = 10
+
 
 
     def handle_events(self, game, event):
@@ -30,7 +44,7 @@ class Gameplay(Scene):
                 
 
     def execute(self, game):
-        self.generate_attacks()
+        self.generate_attacks(game)
         self.draw_webcam(game)
         self.draw_attacks(game)
         self.draw_indicator(game)
@@ -40,10 +54,18 @@ class Gameplay(Scene):
         self.draw_time(game)
 
 
-    def generate_attacks(self):
-        if self.curr_attack == -1 or self.curr_attack.finished:
+    def generate_attacks(self, game):
+        if self.curr_attack.finished:
             rand_attack = random.choice(self.attacks)
-            self.curr_attack = rand_attack(1)
+            self.curr_attack = rand_attack(self.speed)
+
+        if self.speed_timer <= 0:
+            self.speed_timer = 10
+            self.speed += 0.1
+
+            print("Speed increased to " + str(self.speed))      
+
+        self.speed_timer -= game.dt
 
 
     def draw_indicator(self, game):
@@ -58,6 +80,6 @@ class Gameplay(Scene):
     def draw_time(self, game):
         game.time += game.dt
         game.best_time = max(game.time, game.best_time)
-        
+
         time_text = game.medium_font.render(f"Time: {game.time:.2f}", True, settings.TEXT_COLOR)
         game.base_surface.blit(time_text, (10, 10))

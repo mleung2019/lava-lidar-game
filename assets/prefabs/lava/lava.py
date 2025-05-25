@@ -7,7 +7,19 @@ class Lava:
         self.loops = 3
         self.finished = False
         self.opacity = 127
-        self.pos_x = pos * ratio
+
+        # For non-homing lava
+        if pos != -1:
+            self.pos_x = pos * ratio
+            
+            # Prune the lava on the right side of the screen
+            if pos + width > settings.GRID_SIZE:
+                width -= pos + width - settings.GRID_SIZE
+        
+        # For homing lava
+        else:
+            self.pos_x = -1
+
         self.width = width * ratio
         self.speed = speed
 
@@ -17,6 +29,20 @@ class Lava:
     
 
     def execute(self, game):
+        # For homing lava
+        if self.pos_x == -1:
+            self.pos_x = game.lidar_parse() - (self.width / 2)
+            
+            # Prune the lava on the left side of the screen
+            if self.pos_x < 0:
+                self.width += self.pos_x
+                self.pos_x = 0
+            
+            # Prune the lava on the right side of the screen
+            if self.pos_x + self.width > settings.SCREEN_WIDTH:
+                self.width -= self.pos_x + self.width - settings.SCREEN_WIDTH
+
+
         self.draw_lava_anim(game)
         
         
@@ -29,8 +55,8 @@ class Lava:
         game.base_surface.blit(warning_rect, (self.pos_x, 0))
 
         # Draw indicator 
-        icon_pos_x = ((self.pos_x * 2) + self.width) // 2
-        icon_pos_y = settings.SCREEN_HEIGHT // 2
+        icon_pos_x = ((self.pos_x * 2) + self.width) / 2
+        icon_pos_y = settings.SCREEN_HEIGHT / 2
         indicator = self.caution
 
         # Counter

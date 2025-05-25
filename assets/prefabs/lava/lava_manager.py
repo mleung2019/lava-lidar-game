@@ -13,6 +13,7 @@ class LavaManager:
         self.curr_obstacles = [] # An array of all obstacles currently on screen
         self.timer = 0 # Timer for when the next wave of obstacles should arrive
 
+
     def execute(self, game):
         # Loading obstacles
         while self.timer <= 0 and len(self.obstacles) != 0:
@@ -33,7 +34,7 @@ class LavaManager:
         # Filter out obstacles that need to be despawned
         self.curr_obstacles = [obstacle for obstacle in self.curr_obstacles if not obstacle.finished]
 
-        if len(self.obstacles) == 0 and len(self.curr_obstacles) == 0:
+        if len(self.obstacles) == 0 and len(self.curr_obstacles) == 0 and self.timer <= 0:
             self.finished = True
 
         self.timer -= game.dt

@@ -98,6 +98,23 @@ class Game:
         pygame.quit()
 
     
+    def lidar_parse(self):
+        if not settings.DEBUG:
+            percentage = (self.lidar.measurement - self.calibration[0]) / (self.calibration[1] - self.calibration[0])
+            
+            # If the player is within 15 cm of the left calibration boundary
+            if self.lidar.measurement <= self.calibration[0] + 15:
+                self.old_arrow_x = pygame.math.clamp(percentage, 0, 1) * settings.SCREEN_WIDTH
+                return self.old_arrow_x
+            
+            # If out of bounds
+            else:
+                return self.old_arrow_x
+            
+        else:
+            return 0
+
+
     def debug(self):
         fps = self.clock.get_fps()
         fps_text = self.small_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
@@ -105,17 +122,3 @@ class Game:
 
         measurement_text = self.small_font.render(f"M: {self.lidar.measurement}", True, settings.TEXT_COLOR)
         self.base_surface.blit(measurement_text, (905, 10))
-
-
-    def lidar_parse(self):
-        percentage = 0
-
-        if not settings.DEBUG:
-            percentage = (self.lidar.measurement - self.calibration[0]) / (self.calibration[1] - self.calibration[0])
-        
-        if percentage >= 0 and percentage <= 1:
-            self.old_arrow_x = percentage * settings.SCREEN_WIDTH
-            return self.old_arrow_x
-        # Prevents a player from simply stepping out of range to dodge an attack
-        else:
-            return self.old_arrow_x

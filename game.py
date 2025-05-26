@@ -108,7 +108,7 @@ class Game:
         if not settings.DEBUG:
             percentage = (self.lidar.measurement - self.calibration[0]) / (self.calibration[1] - self.calibration[0])
             
-            # If the player is within bound_const cm of the left calibration boundary
+            # If the player is within the left calibration boundary
             if percentage > -0.1:
                 self.old_arrow_x = pygame.math.clamp(percentage, 0, 1) * settings.SCREEN_WIDTH
                 return self.old_arrow_x
@@ -126,7 +126,7 @@ class Game:
         fps_text = self.small_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
         self.base_surface.blit(fps_text, (1065, 10))
 
-        measurement_text = self.small_font.render(f"LIDAR measurement: {self.lidar.measurement} cm", True, settings.TEXT_COLOR)
+        measurement_text = self.small_font.render(f"LIDAR measurement: {self.lidar.measurement}cm", True, settings.TEXT_COLOR)
         measurement_pos = (20, 10)
         if type(self.current_state) is not Gameplay:
             # measurement_pos = (20, 80)

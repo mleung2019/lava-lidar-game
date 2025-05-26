@@ -10,6 +10,11 @@ class Game:
     def __init__(self):
         # Game management
         pygame.init()
+
+        # Load icon
+        app_icon = pygame.image.load("assets/images/app_icon.jpeg")
+        pygame.display.set_icon(app_icon)
+
         pygame.display.set_caption("Lava LIDAR Game")
         self.screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.RESIZABLE)
         self.clock = pygame.time.Clock()
@@ -17,11 +22,12 @@ class Game:
         self.running = True
 
         # Initial game state
-        self.lidar = ReadLidar()
         if settings.DEBUG:
             self.change_states("gameplay")
         else:
             # Open LIDAR
+            port = ReadLidar.list_arduino_ports()[0]
+            self.lidar = ReadLidar(port)
             self.lidar.open_port()
             self.lidar_thread = threading.Thread(target=self.lidar.read_lidar)
             self.lidar_thread.start()
@@ -102,8 +108,8 @@ class Game:
         if not settings.DEBUG:
             percentage = (self.lidar.measurement - self.calibration[0]) / (self.calibration[1] - self.calibration[0])
             
-            # If the player is within 15 cm of the left calibration boundary
-            if self.lidar.measurement <= self.calibration[0] + 15:
+            # If the player is within bound_const cm of the left calibration boundary
+            if percentage > -0.1:
                 self.old_arrow_x = pygame.math.clamp(percentage, 0, 1) * settings.SCREEN_WIDTH
                 return self.old_arrow_x
             
@@ -120,5 +126,8 @@ class Game:
         fps_text = self.small_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
         self.base_surface.blit(fps_text, (1065, 10))
 
-        measurement_text = self.small_font.render(f"M: {self.lidar.measurement}", True, settings.TEXT_COLOR)
-        self.base_surface.blit(measurement_text, (905, 10))
+        measurement_text = self.small_font.render(f"LIDAR measurement: {self.lidar.measurement} cm", True, settings.TEXT_COLOR)
+        measurement_pos = (20, 10)
+        if type(self.current_state) is not Gameplay:
+            # measurement_pos = (20, 80)
+            self.base_surface.blit(measurement_text, measurement_pos)

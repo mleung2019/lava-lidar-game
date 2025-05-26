@@ -10,7 +10,7 @@ class Wait(LavaManager):
         self.obstacles = [0.75]
 
 
-class LeftandRight(LavaManager):
+class LeftAndRight(LavaManager):
     def __init__(self, speed):
         speed *= 0.8
 
@@ -49,8 +49,8 @@ class FullRight(LavaManager):
 
 class CenterOut(LavaManager):
     def __init__(self, speed):
-        speed *= 0.9
-        
+        speed *= 0.75
+
         super().__init__(speed)
 
         center_width = int(settings.GRID_SIZE * 0.67)
@@ -85,6 +85,8 @@ class Drizzle(LavaManager):
         for i in random_pos:
             self.obstacles.append(Lava(i, 1, speed))
             self.obstacles.append(0.1)
+        
+        self.obstacles.pop()
 
 
 class MouseHole(LavaManager):
@@ -105,13 +107,14 @@ class MouseHole(LavaManager):
             else:
                 if continuous != 0:
                     self.obstacles.append(Lava(0, continuous, speed))
-
                 if continuous == 0 or hole_2 != settings.GRID_SIZE - 1:
                     self.obstacles.append(Lava(hole_2+1, settings.GRID_SIZE, speed))
 
 
 class Homing(LavaManager):
     def __init__(self, speed):
+        speed *= 1.1
+
         super().__init__(speed)
 
         width = int(settings.GRID_SIZE * 0.34)
@@ -121,3 +124,18 @@ class Homing(LavaManager):
         third_lava = [Lava(-1, width, speed)]
 
         self.obstacles = first_lava + [0.5] + second_lava + [0.5] + third_lava
+
+
+class MovingDrizzle(LavaManager):
+    def __init__(self, speed):
+        speed *= 0.85
+    
+        super().__init__(speed)
+
+        for _ in range(int(settings.GRID_SIZE * 0.8)):
+            self.obstacles += [
+                Lava(random.randint(0, settings.GRID_SIZE - 1), 1, speed, random.uniform(-0.5, 0.5)),
+                0.1
+            ]
+        
+        self.obstacles.pop()

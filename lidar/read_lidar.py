@@ -1,12 +1,25 @@
 import serial
+import serial.tools.list_ports
 import settings
 
 class ReadLidar:
-    def __init__(self, port=settings.LIDAR_PORT, baudrate=115200):
+    def __init__(self, port, baudrate=115200):
         self.port = port
         self.baudrate = baudrate
         self.ser = None
         self.measurement = 0
+
+
+    @staticmethod
+    def list_arduino_ports():
+        ports = serial.tools.list_ports.comports()
+        arduino_ports = []
+
+        for port in ports:
+            if "usbserial" in port.device:
+                arduino_ports.append(port.device)
+
+        return arduino_ports
 
 
     def open_port(self):

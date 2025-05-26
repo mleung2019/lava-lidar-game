@@ -2,7 +2,7 @@ import pygame
 import settings
 
 class Lava:
-    def __init__(self, pos, width, speed):
+    def __init__(self, pos, width, speed, movement=0):
         ratio = settings.SCREEN_WIDTH / settings.GRID_SIZE
         self.loops = 3
         self.finished = False
@@ -11,17 +11,13 @@ class Lava:
         # For non-homing lava
         if pos != -1:
             self.pos_x = pos * ratio
-            
-            # Prune the lava on the right side of the screen
-            if pos + width > settings.GRID_SIZE:
-                width -= pos + width - settings.GRID_SIZE
-        
         # For homing lava
         else:
             self.pos_x = -1
 
         self.width = width * ratio
         self.speed = speed
+        self.movement = movement
 
         # Caution indicator
         self.caution = pygame.image.load("./assets/images/caution.png").convert_alpha()
@@ -32,21 +28,13 @@ class Lava:
         # For homing lava
         if self.pos_x == -1:
             self.pos_x = game.lidar_parse() - (self.width / 2)
-            
-            # Prune the lava on the left side of the screen
-            if self.pos_x < 0:
-                self.width += self.pos_x
-                self.pos_x = 0
-            
-            # Prune the lava on the right side of the screen
-            if self.pos_x + self.width > settings.SCREEN_WIDTH:
-                self.width -= self.pos_x + self.width - settings.SCREEN_WIDTH
-
 
         self.draw_lava_anim(game)
         
         
     def draw_lava_anim(self, game):
+        self.prune_lava()
+
         # Set rectangle dimensions and color
         warning_rect = pygame.Surface((self.width, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
         warning_rect.fill((255, 0, 0, self.opacity))
@@ -73,6 +61,11 @@ class Lava:
         # Update opacity
         self.opacity -= self.speed * game.dt * 300
         
+        # Movement frames
+        if self.loops > 0:
+            if self.movement:
+                self.pos_x += self.speed * game.dt * self.movement * 600
+
         # Detection frames
         if self.loops == 0:
             if self.opacity > 200 and self.opacity < 255:
@@ -85,10 +78,9 @@ class Lava:
             # Reset blinking effect
             if self.loops > 0:
                 self.opacity = 127
-
             elif self.loops == 0:
                 self.opacity = 255
-                self.speed *= 2
+                self.speed = max(2, self.speed * 2)
             # Despawn
             else:
                 self.finished = True
@@ -102,3 +94,24 @@ class Lava:
 
         if (player_pos >= bound_left and player_pos <= bound_right):
             game.change_states("restart")
+
+
+    def prune_lava(self):
+        # Only prune lava if it's static
+        if not self.movement:
+            # Prune the lava on the left side of the screen
+            if self.pos_x < 0:
+                self.width += self.pos_x
+                self.pos_x = 0
+            
+            # Prune the lava on the right side of the screen
+            if self.pos_x + self.width > settings.SCREEN_WIDTH:
+                self.width -= self.pos_x + self.width - settings.SCREEN_WIDTH
+        else:
+            # Wraparound
+            if self.movement > 0:
+                if self.pos_x > settings.SCREEN_WIDTH:
+                    self.pos_x = 0
+            else:
+                if self.pos_x + self.width < 0:
+                    self.pos_x = settings.SCREEN_WIDTH

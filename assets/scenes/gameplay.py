@@ -17,7 +17,7 @@ class Gameplay(Scene):
 
         # All attacks
         self.attacks = [
-            LeftandRight,
+            LeftAndRight,
             FullLeft,
             FullRight, 
             CenterOut, 
@@ -25,6 +25,7 @@ class Gameplay(Scene):
             Drizzle, 
             MouseHole,
             Homing,
+            MovingDrizzle,
         ]
 
         # Speed

@@ -6,7 +6,8 @@ from assets.scenes.scene import Scene
 class Restart(Scene):
     def __init__(self):
         super().__init__()
-
+        pygame.mouse.set_visible(True)
+        
         # Instance variables
         self.opacity = 0
         self.anim_finished = False

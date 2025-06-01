@@ -15,24 +15,32 @@ class Game:
         app_icon = pygame.image.load("assets/images/app_icon.jpeg")
         pygame.display.set_icon(app_icon)
 
+        # Game window
         pygame.display.set_caption("Lava LIDAR Game")
         self.screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.RESIZABLE)
         self.clock = pygame.time.Clock()
         self.dt = 0
         self.running = True
+        self.debug_run = False
 
-        # Initial game state
-        if settings.DEBUG:
-            self.change_states("gameplay")
+        pygame.event.wait()
+
+        # Open LIDAR
+        port = ReadLidar.list_arduino_ports()
+
+        # If no ports are available
+        if not len(port):
+            self.lidar = ReadLidar(-1)
+            self.debug_run = True
+        # If ports are available, start LIDAR thread
         else:
-            # Open LIDAR
-            port = ReadLidar.list_arduino_ports()[0]
-            self.lidar = ReadLidar(port)
+            self.lidar = ReadLidar(port[0])
             self.lidar.open_port()
             self.lidar_thread = threading.Thread(target=self.lidar.read_lidar)
             self.lidar_thread.start()
 
-            self.change_states("calibration")
+        # Go to calibration screen
+        self.change_states("calibration")
 
         # Game rendering
         self.base_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)).convert_alpha()
@@ -44,7 +52,7 @@ class Game:
         self.best_time = 0
         # First element is the LIDAR measurement on the left side, second element
         # is the LIDAR measurement on the right side
-        self.calibration = [-1, -2]
+        self.calibration = [-1, -1]
         self.old_arrow_x = 0
 
         # Font(s)
@@ -58,7 +66,8 @@ class Game:
             self.time = 0
             self.current_state = Gameplay()
         elif state == "calibration":
-            self.current_state = Calibration()
+            # Disable calibration screen if playing with the mouse
+            self.current_state = Calibration(2 if self.debug_run else 0)
         elif state == "restart":
             self.current_state = Restart()
 
@@ -97,7 +106,7 @@ class Game:
             self.frame_counter += 1
         
         # Close LIDAR
-        if not settings.DEBUG:
+        if not self.debug_run:
             self.lidar.measurement = -1
             self.lidar_thread.join()
         
@@ -105,7 +114,7 @@ class Game:
 
     
     def lidar_parse(self):
-        if not settings.DEBUG:
+        if not self.debug_run:
             percentage = (self.lidar.measurement - self.calibration[0]) / (self.calibration[1] - self.calibration[0])
             
             # If the player is within the left calibration boundary
@@ -118,13 +127,14 @@ class Game:
                 return self.old_arrow_x
             
         else:
-            return 0
+            # Use mouse to control movement
+            return pygame.mouse.get_pos()[0]
 
 
     def debug(self):
-        fps = self.clock.get_fps()
-        fps_text = self.small_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
-        self.base_surface.blit(fps_text, (1065, 10))
+        # fps = self.clock.get_fps()
+        # fps_text = self.small_font.render(f"FPS: {fps:.1f}", True, settings.TEXT_COLOR)
+        # self.base_surface.blit(fps_text, (1065, 10))
 
         measurement_text = self.small_font.render(f"LIDAR measurement: {self.lidar.measurement}cm", True, settings.TEXT_COLOR)
         measurement_pos = (20, 10)

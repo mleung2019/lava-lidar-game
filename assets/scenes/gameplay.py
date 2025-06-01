@@ -7,6 +7,7 @@ from assets.prefabs.lava.lava_attacks import *
 class Gameplay(Scene):
     def __init__(self):
         super().__init__()
+        pygame.mouse.set_visible(False)
 
         # Arrow indicator
         self.arrow = pygame.image.load("./assets/images/arrow.png").convert_alpha()

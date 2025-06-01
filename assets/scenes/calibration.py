@@ -3,27 +3,28 @@ import settings
 from assets.scenes.scene import Scene
 
 class Calibration(Scene):
-    def __init__(self):
+    def __init__(self, cali_state=0):
         super().__init__()
+        pygame.mouse.set_visible(True)
 
         # Instance variables 
-        self.cali_states = 0
+        self.cali_state = cali_state
 
 
     def handle_events(self, game, event):
         # Left click
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.cali_states == 0:
+            if self.cali_state == 0:
                 # Left
                 game.calibration[0] = game.lidar.measurement
-            elif self.cali_states == 1:
+            elif self.cali_state == 1:
                 # Right
                 if game.calibration[0] == game.lidar.measurement:
-                    self.cali_states = -1
+                    self.cali_state = -1
                 game.calibration[1] = game.lidar.measurement
             else:
                 game.change_states("gameplay")
-            self.cali_states += 1
+            self.cali_state += 1
                 
 
     def execute(self, game):
@@ -43,9 +44,9 @@ class Calibration(Scene):
 
     def draw_help_text(self, game):
         help_text = game.small_font.render("Click anywhere to start game", True, settings.TEXT_COLOR)
-        if self.cali_states == 0:
+        if self.cali_state == 0:
             help_text = game.small_font.render("Move to the left side of the screen and click anywhere", True, settings.TEXT_COLOR)
-        if self.cali_states == 1:
+        if self.cali_state == 1:
             help_text = game.small_font.render("Move to the right side of the screen and click anywhere", True, settings.TEXT_COLOR)
 
         text_rect = help_text.get_rect(center=(settings.SCREEN_WIDTH // 2, settings.SCREEN_HEIGHT // 2))
